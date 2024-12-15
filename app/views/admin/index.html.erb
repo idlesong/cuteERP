@@ -62,8 +62,9 @@
   <thead>
     <tr>
       <th><h4><%=t(:sales_orders)%>#</h4></th>
+      <th><h4><%=t(:uniform_number)%></h4></th>       
       <th><h4><%=t(:customer)%></h4></th>
-      <th><h4><%=t(:refer_po)%>#</h4></th>
+      <th><h4><%=t(:refer_po)%>#</h4></th>     
       <th><h4><%=t(:part_number)%></h4></th>
       <th class="text-right"><h4><%=t(:price)%></h4></th>
       <th class="text-right"><h4><%=t(:quantity)%></h4></th>
@@ -85,8 +86,13 @@
       <% order_number = find_order_number_from_reference(line_item.refer_line_id) %>
         <tr>
           <td>#<%= link_to(order.serial_number, sales_order_path(order.id)) %>-<%= link_to(order.id,sales_order_path(order.id)) %></td>
+          <% if line_item.uniform_number %>
+            <td> <%= line_item.uniform_number %> </td>
+          <% else %>
+            <td><%= link_to(t(:produce_order), production_edit_sales_order_path(order.id)) %></td>          
+          <% end %>             
           <td><%= link_to order.customer.name, order.customer %></td>
-          <td><%= order_number%></td>
+          <td><%= order_number%></td>       
           <td><%= line_item.full_part_number %> </td>
             <% line_price = line_item.show_currency_price(order.exchange_rate, order.customer.currency) %>
           <td class="text-right"><%= number_to_currency(line_price, unit: currency_unit) %> </td>

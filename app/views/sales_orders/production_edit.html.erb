@@ -1,0 +1,93 @@
+<%= render 'shared/delivery_status_modal'%>
+
+<!-- <p id="notice"><= notice ></p> -->
+<h1><%=t(:sales_order)%></h1>
+
+<div id="orderHeaderDiv">
+<%= render partial: 'orderHeader'%>
+</div>
+
+<div class="panel panel-default">
+  <!-- <div class="panel-heading"><h5>Order Details<h5></div> -->
+  <div class="panel-body">
+    <h5><%=t(:order_details)%> </h5>
+    <table class="table">
+    	<thead>
+    		<tr>
+    			<th><h4>#</h4></th>
+    			<th><h4><%=t(:uniform_number)%></h4></th>
+    			<th><h4><%=t(:part_number)%></h4></th>
+    			<th><h4><%=t(:quantity)%></h4></th>
+    			<th><h4><%=t(:property)%>/<%=t(:remark)%></h4></th>
+    			<th><h4><%=t(:plan_ship_date)%></h4></th>
+    		</tr>
+    	</thead>
+      <% if @sales_order.customer.currency == 'RMB'
+            currency_unit = '¥'
+          else
+            currency_unit = '$'
+          end %>
+
+      <% new_uniform_number = @sales_order.generate_uniform_number %>   
+    	<% @sales_order.line_items.each_with_index do |line_item, index| %>
+    		<tr>
+    			<td><%= link_to index+1, line_item_path(line_item.id) %> </td>
+          <%= form_for(line_item, :html => { :uniform_number => true }) do |f| %>
+            <td><%= f.text_field(:uniform_number, value: new_uniform_number) %></td>
+            <td><%= line_item.full_part_number%> </td>
+            <td><%= line_item.quantity %> </td>         
+            <td><%= f.text_field(:remark, placeholder: "V0.00.000" ) %></td>
+            <td></td>                 
+            <td><%= f.submit(t(:place_uniform_order), :class=>"btn btn-xs btn-primary") %></td>
+          <% end %>          
+    			<td></td>
+    		</tr>
+
+
+
+    	<% end %>
+
+	    <tr><td colspan="7"> <strong><%=t(:remark)%>:</strong>
+         <% if currency_unit == '$' %>
+           Exchange rate:<%= @sales_order.exchange_rate %>
+         <% end %>
+         </td></tr>
+    </table>
+  </div>
+
+  <div class="panel-footer">
+    <% if not @sales_order.delivery_date %>
+    | <%= link_to t('.edit', :default => t("helpers.links.edit")), edit_sales_order_path(@sales_order) %> |
+    <% end %>
+
+    | <a href= <%="#{invoice_sales_order_path(@sales_order)}.pdf"%> class="" target="_blank"><%=t(:invoice)%> </a>
+    | <a href= <%="#{packing_list_sales_order_path(@sales_order)}.pdf"%> class="" target="_blank"><%=t(:packing_list)%> </a>
+
+    | <% if @sales_order.delivery_status %>
+      <%= "ship:#{@sales_order.delivery_status}" %>
+    <% else %>
+      <a class="shipLink" href="" data-toggle="modal" data-target="#deliveryStatusModal"
+      data-id=<%="#{@sales_order.id}" %> > <%=t(:ship_status)%> </a>
+    <% end %>
+
+  </div>
+</div>
+
+<%= render('packing_list') %>
+
+
+<!-- Large modal Invoice-->
+<div class="modal fade bs-invoice-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-body">
+
+        <%= render('invoice') %>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <a href= <%="#{invoice_sales_order_path(@sales_order)}.pdf"%> class="btn btn-primary" target="_blank">Print Invoice </a>
+      </div>
+    </div>
+  </div>
+</div>

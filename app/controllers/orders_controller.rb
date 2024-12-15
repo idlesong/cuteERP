@@ -185,8 +185,18 @@ class OrdersController < ApplicationController
   end
 
   def import
-    Order.import(params[:file])
-    redirect_to orders_url, notice: "Orders imported."
+    import_errors = Order.import(params[:file])
+    
+    respond_to do |format|    
+      if import_errors.length == 0
+        # redirect_to orders_url, notice: "Orders imported."
+        format.html { redirect_to orders_url, notice: "Orders imported." }
+        # format.json { render json: @price, status: :created, location: @price }
+      else
+        format.html { redirect_to orders_url, notice: import_errors }
+        # format.json { render json: @price.errors, status: :unprocessable_entity }
+      end  
+    end  
   end
 
   # DELETE /orders/1

@@ -14,4 +14,6 @@ user1 = User.create(:name => 'admin',
 idlesong = User.create(:name => 'qinkunsong',
 	:password => 'cuteerp'
 	)
-
+yuxiaofang = User.create(:name => 'yuxiaofang',
+	:password => 'cuteerp'
+	)

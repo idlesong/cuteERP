@@ -17,8 +17,8 @@ class Price < ActiveRecord::Base
   validates :item_id, :presence => true
   validates :customer_id, :presence => true
 
-  before_save  :ensure_price_is_unique?
-  before_destroy :ensure_not_used_by_others  
+  # before_save  :ensure_price_is_unique?
+  # before_destroy :ensure_not_used_by_others  
 
 
   def generate_price_number
@@ -83,28 +83,71 @@ class Price < ActiveRecord::Base
   def self.import(file)
     spreadsheet = open_spreadsheet(file)
 
-    # header = spreadsheet.row(1)
+    import_errors = []
     header = ["price_number", "customer_name", "part_number", "price", "condition", 
-    "base_price", "extra_price", "remark", "status", "created_at"]    
+    "base_price", "extra_price", "is_prr", "remark", "status", "created_at"]    
 
+    row_header = spreadsheet.row(1)
+    if !row_header.include?('price_number') || !row_header.include?('price') || !row_header.include?('is_PRR')
+      logger.debug "=====@@@@Error: Invalid price list format== #{row_header[0]}"
+      import_errors.push('Error:Not a price list format, header[0] is ' + row_header[0])  
+
+      return import_errors
+    end 
+    
     (2..spreadsheet.last_row).each do |i|
 
       row = Hash[[header, spreadsheet.row(i)].transpose]
-      # primary key: price_number, update exsit, or create new one
+      # primary key: price_number, update if exsit, or create new one
       price = find_by(price_number: row["price_number"])  || new
       row_attributes = row.to_hash.slice(*header)   
       
-      # price.part_number and customer_name are fixed; auto link to id when import
-      row_attributes.store("item_id", Item.find_by(partNo: row_attributes["part_number"]).id)
-      row_attributes.store("customer_id", Customer.find_by(name: row_attributes["customer_name"]).id)  
+      # validations: 
+      # New or update, item_id, customer_id, prices, condition
+      # - Valid price_number: QO20240101-01
+      # Update when customer & item & price & condition exist and valid
+      # - item & customer exists? => find the id
+      # - Valid item: can find item_id, with fuzzy search part_number
+      # - Valid customer: can find customer_id, with fuzzy search customer_name
+      # - Valid price and voluem: normal number, volume is intger
+      # QO20240101 should be the same as created_at
+      
+      # validate part_number, customer_name, price, condition presence 
+      if (row_attributes["part_number"].blank? || row_attributes["customer_name"].blank? || row_attributes["price"].blank? || row_attributes["condition"].blank?)
+        import_errors.push(price.price_number + ":Error:item |customer |price |quantity blank");
 
-      # logger.debug "=====import row_attributes== #{row_attributes}"      
-      # import row according to row header
-      (header + ["item_id", "customer_id"]).each do |attr|
-        price.update_attribute(attr, row_attributes[attr])
+        return import_errors
       end
-      # logger.debug "=====row attr== #{price.attributes[attr]}, #{row_attributes[attr]}"      
+
+      # validate part_number, customer name are valid, auto link to id when import
+      # if item = Item.where('lower(partNo) = ?', row_attributes["part_number"].downcase).first
+      if item = Item.find_by(partNo: row_attributes["part_number"]) 
+        if customer = Customer.where('lower(name) = ?', row_attributes["customer_name"].downcase).first
+        # if customer = Customer.find_by(name: row_attributes["customer_name"])
+          row_attributes.store("item_id", item.id)  
+          row_attributes.store("customer_id", customer.id)
+
+          if row_attributes["is_prr"] == "PRR" 
+            row_attributes.store("is_prr", 1)
+          else
+            row_attributes.store("is_prr", 0)
+          end
+
+          (header + ["item_id", "customer_id"]).each do |attr|
+            # logger.debug "=====row attr== #{price.attributes[attr]}, #{row_attributes[attr]}"      
+            price.update_attribute(attr, row_attributes[attr])
+          end
+        else
+          # logger.debug "=====@@@@Error: can't find customer== #{price.price_number}:#{row_attributes["customer_name"]}"
+          import_errors.push('row' + i.to_s + ":Unknow customer:" + row_attributes["customer_name"])
+        end  
+      else
+        # logger.debug "=====@@@@Error: can't find item== #{row_attributes["part_number"]}"  
+        import_errors.push('row' + i.to_s + ":Unknow product:" + row_attributes["part_number"])                
+      end  
     end
+
+    return import_errors
   end
 
   def self.open_spreadsheet(file)

@@ -15,9 +15,9 @@ class User < ActiveRecord::Base
   has_settings do |s|
     s.key :company, :defaults => { :name_en => "Wuxi Sicomm Communication Technologies, Inc.",
                                    :name_zh => "无锡士康通讯技术有限公司",
-                                   :address_en => "F2, Building B, Changjiang Road, Wuxi, Jiangsu, China",
-                                   :address_zh => "无锡市新吴区长江路21号B栋2楼",
-                                   :telephone => "0510-66682208" }
+                                   :address_en => "Address:Room 101, Changjiang Road 21-1, Wuxi, Jiangsu, China",
+                                   :address_zh => "地址:无锡市新吴区长江路21-1号101",
+                                   :telephone => "TEL:0510-66682208, FAX:0510-66682207" }
     s.key :exchange_rate, :defaults => { :current_month => "6.3" }   
     s.key :remark, :defaults => { :order_remark_en => "Unit price includes 13% VAT;",
                                   :order_remark_zh => "此价格包含13%增值税",

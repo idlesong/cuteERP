@@ -108,7 +108,7 @@ class PricesController < ApplicationController
   def edit
     @price = Price.find(params[:id])
     @customers = Customer.order("credit DESC").where("credit > ?", 0)    
-    @latest_release_set_price = SetPrice.order(released_at: :asc).last
+    @latest_released_set_prices = SetPrice.order(released_at: :asc).last
 
     @customer = current_customer
 
@@ -167,7 +167,7 @@ class PricesController < ApplicationController
     end
 
     # @latest_released_set_price = SetPrice.order(released_at: :asc).last
-    # @step_quantities = @latest_release_set_price.settings(:step_quantities).quantities 
+    # @step_quantities = @latest_released_set_prices.settings(:step_quantities).quantities 
     # @step_quantities = [1, 1000, 2500, 5000, 10000, 20000, 50000, 100000]
     @step_quantities = current_user.settings(:step_values).quantities    
 
@@ -188,8 +188,19 @@ class PricesController < ApplicationController
   end
 
   def import
-    Price.import(params[:file])
-    redirect_to prices_url, notice: "Prices imported."
+    import_errors = Price.import(params[:file])
+    # redirect_to prices_url, notice: "Prices imported."
+
+    respond_to do |format|
+      if import_errors.length == 0
+        format.html { redirect_to prices_url, notice: "Prices imported." }
+        # format.json { render json: @price, status: :created, location: @price }
+      else
+        format.html { redirect_to prices_url, notice: import_errors }
+        # format.json { render json: @price.errors, status: :unprocessable_entity }
+      end
+    end
+
   end  
 
   # DELETE /prices/1

@@ -1,4 +1,9 @@
 <%- model_class = Customer -%>
+
+<% if notice %>
+  </br> <p id="notice" class="alert alert-info" role="alert"><%= notice %></p>
+<% end %>
+
 <div class="page-header">
   <h1><%=t(:customer) %></h1>
 </div>

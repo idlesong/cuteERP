@@ -1,36 +1,70 @@
 <div class="panel panel-default">
-    <!-- <div class="panel-heading"><h3>Sales Order<h3></div> -->
-    <div class="panel-body">
+  <!-- <div class="panel-heading"><h3>Sales Order<h3></div> -->
+  <div class="panel-body">
 
-      <table class="table">
-        <thead>
-          <tr>
-            <td>
-              <h3><%= @sales_order.customer.name %> </h3>
-            </td>
-            <td>
-              <h4 class="text-right"><%=t(:show_date)%>:<%= DateTime.now.to_date %></h4>
-              <h5 class="text-right"><%=t(:order_number)%>#:<%= @sales_order.serial_number %></h5>
-              <h4 class="text-right"><%=t(:payment_term)%>:<%= @sales_order.payment_term %></h4>
-            </td>
-          </tr>
-        </thead>
-        <tr><td colspan = "2"><h3 class="text-center"><%=t(:sales_order)%></h3></td></tr>
-        <tr><td><h4><%=t(:bill_to)%>:<%= @sales_order.customer.name %>
+    <h2>
+      <%=image_tag('sicomm_logo.jpg') %><%= current_user.settings(:company).name_zh %>
+    </h2>
+    <table class="table">
+      <thead>
+        <tr>
+          <td>
+            <h5><%= current_user.settings(:company).name_en %></h5>
+            <h5><%= current_user.settings(:company).address_zh %> </h5>
+            <h5><%= current_user.settings(:company).telephone %></h5>
+          </td>
+          <td>
+            <h4 class="text-right"><%=t(:show_date)%>:<%= @sales_order.created_at.to_date %></h4>
+            <h4 class="text-right"><%=t(:sales_order_number)%>#:<%= @sales_order.serial_number %></h4>
+            <h4 class="text-right"><%=t(:payment_term)%>:<%= @sales_order.payment_term %></h4>
+            <h4 class="text-right">
+              
+              <!-- (plan)delivery_date and sales_order status_step_progress_bar -->  
+              <% unless @sales_order.delivery_date.nil? %>
+                <%=t(:ship_date)%>:<%= @sales_order.delivery_date.to_date %>
+              <% else %>
+                <%=t(:plan_ship_date)%>:
+                <% ship_plan_text = '0000-00-00' %>
+                <% if @sales_order.delivery_plan %>
+                  <% ship_plan_text = @sales_order.delivery_plan.to_date %>
+                <% end %>  
+                <% if not @sales_order.delivery_date %>
+                  <a class="shipLink" href="" data-toggle="modal" data-target="#rescheduleModal"
+                    data-id=<%="#{@sales_order.id}" %> > <%=ship_plan_text %> &#x21bb </a>
+                <% end %> 
+              <% end %>
+
+              </br>
+              <%= link_to(t(:step_plan), sales_order_path(@sales_order)) %> >
+              <%= link_to(t(:step_produce), production_show_sales_order_path(@sales_order)) %> >
+              <%= link_to(t(:step_ship), confirm_sales_order_path(@sales_order)) %>
+
+            </h4>              
+          </td>
+        </tr>
+      </thead>
+      <tr><td colspan = "2"><h3 class="text-center"><%=t(:sales_order)%></h3></td></tr>
+      <tr><td><h4><%=t(:bill_to)%>:<%= link_to @sales_order.customer.name, @sales_order.customer %>
+
+        <% if false %>
           <a type="button" class="btn btn-primary btn-sm" data-toggle="modal"
           data-target="#customersModal">
             <%=t(:change_customer)%>
-          </a>  </h4>
-        </td>  <td><h4><%=t(:ship_to)%>:<%= @sales_order.customer.name %></h4></td></tr>
+          </a>  
+        <% end %>
 
-        <tr><td><strong><%=t(:contact)%>:</strong><%= @sales_order.bill_contact %></td>
-            <td><strong><%=t(:contact)%>:</strong><%= @sales_order.ship_contact %></td></tr>
-        <tr><td><strong><%=t(:address)%>:</strong><%= @sales_order.bill_address %></td>
-            <td><strong><%=t(:address)%>:</strong><%= @sales_order.ship_address %></td></tr>
-        <tr><td><strong><%=t(:telephone)%>:</strong><%= @sales_order.bill_telephone %></td>
-            <td><strong><%=t(:telephone)%>:</strong><%= @sales_order.ship_telephone %></td></tr>
+          </h4>
+        </td>  
+        <td><h4><%=t(:ship_to)%>:<%= @sales_order.customer.full_name %></h4></td></tr>
 
-      </table>
+      <tr><td><strong><%=t(:contact)%>:</strong><%= @sales_order.bill_contact %></td>
+          <td><strong><%=t(:contact)%>:</strong><%= @sales_order.ship_contact %></td></tr>
+      <tr><td><strong><%=t(:address)%>:</strong><%= @sales_order.bill_address %></td>
+          <td><strong><%=t(:address)%>:</strong><%= @sales_order.ship_address %></td></tr>
+      <tr><td><strong><%=t(:telephone)%>:</strong><%= @sales_order.bill_telephone %></td>
+          <td><strong><%=t(:telephone)%>:</strong><%= @sales_order.ship_telephone %></td></tr>
 
-    </div>
+    </table>
+
   </div>
+</div>

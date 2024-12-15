@@ -1,4 +1,7 @@
-<!-- <p id="notice"><= notice ></p> -->
+<% if notice %>
+  </br> <p id="notice" class="alert alert-info" role="alert"><%= notice %></p>
+<% end %>
+
 <% if true %>
 <h3> <%=t(:order)%>(<%=t(:show_as_lines)%>) </h3>
 <table class="table datatable">

@@ -3,6 +3,11 @@
 <!-- <p id="notice"><= notice ></p> -->
 <h1><%=t(:sales_order)%></h1>
 
+<div id="orderHeaderDiv">
+<%= render partial: 'orderHeader'%>
+</div>
+
+<% if false %>
 <div class="panel panel-default">
   <!-- <div class="panel-heading"><h3>Customer Order<h3></div> -->
   <div class="panel-body">
@@ -35,17 +40,13 @@
                   <a class="shipLink" href="" data-toggle="modal" data-target="#rescheduleModal"
                     data-id=<%="#{@sales_order.id}" %> > <%=ship_plan_text %> &#x21bb </a>
                 <% end %> 
-
-                <% if false %>              
-                <% if not @sales_order.delivery_plan.nil? %>
-                  <%= @sales_order.delivery_plan.to_date %> 
-                <% end %>
-                <% end %>
-                </br>
-                <%= link_to(t(:edit_order), edit_sales_order_path(@sales_order)) %> >
-                <%= link_to(t(:process_order), production_sales_order_path(@sales_order)) %> >
-                <%= link_to(t(:ship_now), confirm_sales_order_path(@sales_order)) %>
+                <%= link_to(t(:ship_now), confirm_sales_order_path(@sales_order)) %>                  
               <% end %>
+
+              </br>
+              <%= link_to(t(:order_plan), sales_order_path(@sales_order)) %> >
+              <%= link_to(t(:order_produce), production_show_sales_order_path(@sales_order)) %> >
+            
             </h4>
           </td>
         </tr>
@@ -65,6 +66,8 @@
 
   </div>
 </div>
+<% end %>
+
 
 <div class="panel panel-default">
   <!-- <div class="panel-heading"><h5>Order Details<h5></div> -->
@@ -88,6 +91,10 @@
             currency_unit = '$'
           end %>
     	<% @sales_order.line_items.each_with_index do |line_item, index| %>
+        <%  if index == 0
+              @refer_order_number = find_order_number_from_reference(line_item.refer_line_id) 
+            end %>
+
     		<tr>
     			<td><%= link_to index+1, line_item_path(line_item.id) %> </td>
     			<td><%= line_item.full_name %> </td>
@@ -109,6 +116,7 @@
     	<% end %>
 
 	    <tr><td colspan="7"> <strong><%=t(:remark)%>:</strong>
+         <%= @refer_order_number %>
          <% if currency_unit == '$' %>
            Exchange rate:<%= @sales_order.exchange_rate %>
          <% end %>

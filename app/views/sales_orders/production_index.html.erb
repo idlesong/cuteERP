@@ -1,19 +1,25 @@
-<% if notice %>
-  </br> <p id="notice" class="alert alert-info" role="alert"><%= notice %></p>
-<% end %>
-
+<!-- <p id="notice"><= notice ></p> -->
 <div class="page-header"><h1> <%=t(:sales_orders)%>(<%=t(:show_as_lines)%>) </h1></div>
+
+<% production_view = true %>
 <table class="table datatable">
   <thead>
     <tr>
       <th><h4><%=t(:sales_order_number)%>#</h4></th>
       <th><h4><%=t(:uniform_number)%></h4></th>
       <th><h4><%=t(:customer)%></h4></th>
+      <% if production_view == false %>      
       <th><h4><%=t(:refer_po)%>#</h4></th>
-      <th><h4><%=t(:part_name)%></h4></th>
+      <% end %>
+      <th><h4><%=t(:part_number)%></h4></th>
+      <th><h4><%=t(:property)%></h4></th>      
+      <% if production_view == false %>
       <th><h4><%=t(:price)%></h4></th>
+      <% end %>
       <th><h4><%=t(:quantity)%></h4></th>
+      <% if production_view == false %>      
       <th><h4><%=t(:suble_total)%></h4></th>
+      <% end %>
       <th><h4><%=t(:plan_ship_date)%></h4></th>      
       <th><h4><%=t(:ship_date)%></h4></th>
     </tr>
@@ -32,24 +38,30 @@
         <tr>
           <td>#<%= link_to(order.serial_number, sales_order_path(order.id)) %>-<%= link_to(order.id, sales_order_path(order.id)) %></td>
           <% if line_item.uniform_number %>
-          <td> <%= line_item.uniform_number %> </td>
+            <td> <%= line_item.uniform_number %> </td>
           <% else %>
-          <td><%= link_to('生产六联单', production_edit_sales_order_path(order.id)) %></td>          
+            <td><%= link_to('produce now', production_edit_sales_order_path(order.id)) %></td>          
           <% end %>
           <td><%= order.customer.name %></td>
+      <% if production_view == false %>            
           <td><%= order_number%></td>
+      <% end %>    
           <td><%= line_item.full_part_number %> </td>
+          <td><%= line_item.remark %> </td>
           <% line_price = line_item.show_currency_price(order.exchange_rate, order.customer.currency) %>
           
+      <% if production_view == false %>          
           <% if line_item.price.nil? then %>
           <td><%= number_to_currency(line_price, unit: currency_unit) %> </td>          
           <% else %>
           <td><%= link_to(number_to_currency(line_price, unit: currency_unit), price_path(line_item.price_id))%> </td>
           <% end %> 
+      <% end %>    
           
           <td>x<%= line_item.quantity %> </td>
+      <% if production_view == false %>             
           <td><%= number_to_currency(line_item.total_currency_price(order.exchange_rate, order.customer.currency), unit: currency_unit) %></td>
-
+      <% end %>  
 
           <td>          
             <% ship_plan_text = '0000-00-00' %>
@@ -78,26 +90,4 @@
   <% end %>
 </table>
 
-</br>
-<p>
-</br>
-  <a class="btn btn-primary" data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
-    Advanced: Export, Import sales_orders
-  </a>
-</p>
-<div class="collapse" id="collapseExample">
-  <div class="card card-body">
-    <h4>Export Sales Orders</h4>
-    <%= link_to "Export CSV", sales_orders_path(format: "csv"),:class => "btn btn-primary" %> |
-    <%= link_to "Export Excel", sales_orders_path(format: "xls"),:class => "btn btn-primary" %>
-    
-    
-    <h4>Import Sales Orders</h4>
-    <%= form_tag import_sales_orders_path, multipart: true do %>
-      <%= file_field_tag :file %>
-      <%= submit_tag "Import",  :class=>"btn btn-primary"%>
-    <% end %>
-  </div>
-</div>
-</br>
 </br>

@@ -4,12 +4,12 @@ class SetPricesController < ApplicationController
   def index
     @set_prices = SetPrice.all
 
-    @latest_released_set_price = SetPrice.order(released_at: :asc).last
+    @latest_released_set_prices = SetPrice.order(released_at: :asc).last
     
-    if @latest_released_set_price 
+    if @latest_released_set_prices 
       # @step_quantities = @latest_released_set_price.settings(:step_quantities).quantities
       @step_quantities = current_user.settings(:step_values).quantities
-      @latest_set_prices = SetPrice.where("released_at" => @latest_released_set_price.released_at)
+      @latest_set_prices = SetPrice.where("released_at" => @latest_released_set_prices.released_at).order("line_no ASC")
     end  
 
     respond_to do |format|
@@ -33,18 +33,28 @@ class SetPricesController < ApplicationController
   end
 
   def import
-    SetPrice.import(params[:file])
-    redirect_to set_prices_url, notice: "SetPrice imported."
+    import_errors = SetPrice.import(params[:file])
+    # redirect_to set_prices_url, notice: "SetPrice imported."
+
+    respond_to do |format|
+      if import_errors.length == 0
+        format.html { redirect_to set_prices_url, notice: "SetPrices imported." }
+        # format.json { render json: @price, status: :created, location: @price }
+      else
+        format.html { redirect_to set_prices_url, notice: import_errors }
+        # format.json { render json: @price.errors, status: :unprocessable_entity }
+      end
+    end     
   end
 
   def quotate
-    @latest_release_set_price = SetPrice.order(released_at: :asc).last
-    @latest_set_prices = SetPrice.order("item_id ASC").where("released_at" => @latest_release_set_price.released_at )
+    @latest_released_set_prices = SetPrice.order(released_at: :asc).last
+    @latest_set_prices = SetPrice.order("line_no ASC").where("released_at" => @latest_released_set_prices.released_at )
 
     # step_quantities = ["1000", "2500", "5000", "10000", "50000"]
-    # @step_quantities = @latest_release_set_price.settings(:step_quantities).quantities
+    # @step_quantities = @latest_released_set_prices.settings(:step_quantities).quantities
     @step_quantities = current_user.settings(:step_values).quantities
-    @price_line = @latest_release_set_price.get_price_line("OEM", "SCT3258TN", @step_quantities)
+    @price_line = @latest_released_set_prices.get_price_line("OEM", "SCT3258TN", @step_quantities)
   end
 
   # GET /set_prices/new

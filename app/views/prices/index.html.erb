@@ -1,4 +1,9 @@
 <%- model_class = Price -%>
+
+<% if notice %>
+  </br> <p id="notice" class="alert alert-info" role="alert"><%= notice %></p>
+<% end %>
+
 <div class="page-header">
   <h1><%=t(:price) %><small>---UnitedQuotations</small></h1> 
   <%= link_to t('.new', :default => t("helpers.links.new")),
@@ -46,8 +51,13 @@
         <% end %>        
         <td><%= price.part_number %></td>
         <td><%= price.condition %> </td>
+      <% if false %>
         <% set_price = price.get_set_price(price.item_id, price.condition, Customer.find(price.customer_id).sales_type) %>
-        <% if price.price < set_price - 1 %>
+      <% else %>
+        <% set_price = 1 %>
+      <% end %>
+        <% if false %> 
+        <% price.price < set_price - 1 %>
           <td class="bg-danger"><strong>¥<%= price.price %></strong></td>
         <% else %>
           <td><strong>¥<%= price.price %></strong></td>   
@@ -60,7 +70,9 @@
         <% end %>
         </td>
         <td><% if price.is_prr == 1 %>
-          ✂
+          PRR
+          <% else %>
+          -
         <% end %></td>            
         <td><%= price.remark %> </td>        
         <td>

@@ -52,7 +52,7 @@ ActiveRecord::Schema.define(version: 20221112123509) do
     t.decimal  "balance"
     t.string   "contact"
     t.string   "telephone"
-    t.datetime "created_at",                     null: false
+    t.datetime "created_at",                     null: false  #use received date
     t.datetime "updated_at",                     null: false
     t.string   "full_name"
     t.string   "sales_type"
@@ -73,7 +73,7 @@ ActiveRecord::Schema.define(version: 20221112123509) do
     t.string   "partNo"       # uniq part number
     t.string   "package"
     t.string   "imageURL"
-    t.datetime "created_at",  null: false
+    t.datetime "created_at",  null: false   #can change date to real setup date
     t.datetime "updated_at",  null: false
     t.string   "description"
     t.decimal  "volume"

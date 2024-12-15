@@ -32,10 +32,9 @@
             <li class="list-group-item disabled"><%=t(:sales_group)%></li>
             <li class="list-group-item"><%= link_to t(:admin), '/admin' %></li>            
             <li class="list-group-item"><a href=<%= orders_path %>><%=t(:order)%></a></li>
-            <li class="list-group-item"><a href=<%= sales_orders_path %>><%=t(:sales_orders)%></a></li>
+            <li class="list-group-item"><a href=<%= sales_orders_path %>><%=t(:sales_orders)%></a>-<a href=<%= production_index_sales_orders_path %>><%=t(:produce)%></a></li>
             <li class="list-group-item"><a href=<%= prices_path %>><%=t(:price)%> - </a><a href=<%= set_prices_path %>><%=t(:set_prices_list)%></a></li>
             <li class="list-group-item disabled"><%=t(:tools)%></li>
-            <li class="list-group-item"><a href=<%= sales_orders_path %>><%=t(:production)%></a></li>
             <li class="list-group-item"><a href=<%= opportunities_path %>><%=t(:opportunities)%></a></li>
             <li class="list-group-item"><a href=<%= tasks_path %>><%=t(:tasks)%></a></li>            
             <li class="list-group-item"><a href=<%= contacts_path %>><i class="fa fa-user"></i><%=t(:contact)%></a> - <a href=<%= new_contact_path %> ><i class="fa fa-user"></i> <%=t(:new_contact)%></a></li>

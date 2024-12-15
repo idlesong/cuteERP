@@ -359,5 +359,11 @@ zh-CN:
   ongoing: "进行中"
   property: "固件版本"
   uniform_number: "六联单号"
-  place_uniform_order: "提交生产六联单"
+  place_uniform_order: "下六联单生产"
+  step_plan: "计划"
+  step_produce: "生产"
+  step_ship: "发货"
+  produce: "生产订单"
+  produce_order: "下六联单生产"
+  
 

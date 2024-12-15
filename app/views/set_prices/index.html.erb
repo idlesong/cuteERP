@@ -1,8 +1,13 @@
 <%- model_class = SetPrice -%>
+
+<% if notice %>
+  </br> <p id="notice" class="alert alert-info" role="alert"><%= notice %></p>
+<% end %>
+
 <div class="page-header">
   <h1><%=t(:set_price_list) %></h1>
   Set price list released at :
-  <%= @latest_release_set_price.released_at.strftime("%F") if @latest_release_set_price %>
+  <%= @latest_released_set_prices.released_at.strftime("%F") if @latest_released_set_prices %>
 </div>
 
 <table class="table table-striped">
@@ -98,6 +103,7 @@
 </br>
 </br>
 
+<% if false %>
 
 <div class="page-header">
   <h1><%=t(:set_price) %></h1>
@@ -164,3 +170,5 @@
             :class => 'btn btn-primary' %>
 
 </br>
+
+<% end %>

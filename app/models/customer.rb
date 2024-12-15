@@ -39,15 +39,37 @@ class Customer < ActiveRecord::Base
   def self.import(file)
     spreadsheet = open_spreadsheet(file)
 
-    header = ["territory", "name", "full_name", "sales_type", "disty_id", 
-    "payment", "currency", "since", "address", "contact", "telephone", "credit"]
+    header = [ "name", "full_name", "territory", "address", "contact", "telephone", 
+              "since", "sales_type", "disty_id", "payment", "currency", "credit"]
 
-    # header = spreadsheet.row(1)
+    import_errors = []          
+    row_header = spreadsheet.row(1)
+    if !row_header.include?('name') || !row_header.include?('address') || !row_header.include?('sales_type')
+      logger.debug "=====@@@@Error: Invalid customer list format== #{row_header[0]}"
+      import_errors.push('Error:Not a customer list format, header[0] is ' + row_header[0])  
+
+      return import_errors
+    end 
+
     (2..spreadsheet.last_row).each do |i|
       # logger.debug "=====csv row== #{spreadsheet.row(i)}"
       row = Hash[[header, spreadsheet.row(i)].transpose]
+
+      # validates:
+      # 1. forbidden new customer_name with 空格，横线 _
+      # 3. forbidden new similar customer_name
+      #    - 大小写 '-','_',' ', like "Alim sys, Alim-sys, Alim_sys， alim_Sys")  
+
       # find exsits by uniq name, or new customer
-      customer = find_by_name(row["name"])  || new      
+      # customer = where("name LIKE 'row["name"]'") || new   
+      if row["name"].include?(' ') || row["name"].include?('_')
+        logger.debug "=====@@@@Error: invalid customer name== #{row["name"]}"
+        
+        import_errors.push(row["name"])        
+        next
+      end
+
+      customer = find_by_name(row["name"])  || new 
 
       row_attributes = row.to_hash.slice(*header)
 
@@ -55,6 +77,8 @@ class Customer < ActiveRecord::Base
         customer.update_attribute(attr, row_attributes[attr])
       end       
     end
+
+    return import_errors
   end
 
   def self.open_spreadsheet(file)

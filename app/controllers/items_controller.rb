@@ -101,8 +101,18 @@ class ItemsController < ApplicationController
   end
 
   def import
-    Item.import(params[:file])
-    redirect_to items_url, notice: "Products imported."
+    import_errors = Item.import(params[:file])
+    # redirect_to items_url, notice: "Products imported."
+
+    respond_to do |format|
+      if import_errors.length == 0
+        format.html { redirect_to items_url, notice: "Items imported." }
+        # format.json { render json: @price, status: :created, location: @price }
+      else
+        format.html { redirect_to items_url, notice: import_errors }
+        # format.json { render json: @price.errors, status: :unprocessable_entity }
+      end
+    end    
   end
 
 end

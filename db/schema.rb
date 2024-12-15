@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20240607025523) do
+ActiveRecord::Schema.define(version: 20241027084841) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -104,6 +104,7 @@ ActiveRecord::Schema.define(version: 20240607025523) do
     t.integer  "price_id"
     t.string   "remark"
     t.string   "line_number"
+    t.string   "uniform_number"
   end
 
   add_index "line_items", ["line_id"], name: "index_line_items_on_line_id", using: :btree
@@ -171,7 +172,7 @@ ActiveRecord::Schema.define(version: 20240607025523) do
     t.string   "sales_suggestion"
     t.string   "department_suggestion"
     t.string   "finance_suggestion"
-    t.string   "boss_suggestion"
+    t.string   "approval"
     t.datetime "created_at",                                    null: false
     t.datetime "updated_at",                                    null: false
     t.string   "status"

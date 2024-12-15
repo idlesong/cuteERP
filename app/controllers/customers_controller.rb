@@ -109,7 +109,17 @@ class CustomersController < ApplicationController
   end
 
   def import
-    Customer.import(params[:file])
-    redirect_to customers_url, notice: "Customers imported."
+    import_errors = Customer.import(params[:file])
+    # redirect_to customers_url, notice: "Customers imported."
+    
+    respond_to do |format|
+      if import_errors.length == 0
+        format.html { redirect_to customers_url, notice: "Customers imported." }
+        # format.json { render json: @price, status: :created, location: @price }
+      else
+        format.html { redirect_to customers_url, notice: import_errors }
+        # format.json { render json: @price.errors, status: :unprocessable_entity }
+      end
+    end    
   end  
 end

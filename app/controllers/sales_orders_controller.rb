@@ -2,11 +2,15 @@ class SalesOrdersController < ApplicationController
   # GET /sales_orders
   # GET /sales_orders.json
   def index
-    @sales_orders = SalesOrder.all
+    @sales_orders = SalesOrder.order(serial_number: :asc).all
+    # @annual_orders = SalesOrder.all.order(order_number: :asc)
 
     respond_to do |format|
       format.html # index.html.erb
       format.json { render json: @sales_orders }
+
+      format.csv { send_data @sales_orders.export_to_csv }
+      format.xls { send_data @sales_orders.export_to_csv(col_sep: "\t") }        
     end
   end
 
@@ -74,7 +78,7 @@ class SalesOrdersController < ApplicationController
   end
 
   # GET /sales_orders/1/production
-  def production
+  def production_show
     @sales_order = SalesOrder.find(params[:id])
 
     respond_to do |format|
@@ -84,14 +88,28 @@ class SalesOrdersController < ApplicationController
   end
 
   # GET /sales_orders/1/edit_production
-  def edit_production
+  def production_edit
     @sales_order = SalesOrder.find(params[:id])
+    # if @sales_order.line_item.first.uniform_number.nil
+    #    @sales_order.generate_uniform_number
+    # end
 
     respond_to do |format|
       format.html # new.html.erb
       format.json { render json: @sales_order }
     end  
   end  
+
+  # GET /sales_orders
+  # GET /sales_orders.json
+  def production_index
+    @sales_orders = SalesOrder.all
+
+    respond_to do |format|
+      format.html # index.html.erb
+      format.json { render json: @sales_orders }
+    end
+  end
 
   # POST /sales_orders
   # POST /sales_orders.json
@@ -207,6 +225,21 @@ class SalesOrdersController < ApplicationController
       end
       format.json { render json: @sales_order }
     end    
+  end
+
+  def import
+    import_errors = SalesOrder.import(params[:file])
+    
+    respond_to do |format|    
+      if import_errors.length == 0
+        # redirect_to orders_url, notice: "Orders imported."
+        format.html { redirect_to sales_orders_url, notice: "SalesOrders imported." }
+        # format.json { render json: @price, status: :created, location: @price }
+      else
+        format.html { redirect_to sales_orders_url, notice: import_errors }
+        # format.json { render json: @price.errors, status: :unprocessable_entity }
+      end  
+    end  
   end
 
   # DELETE /sales_orders/1

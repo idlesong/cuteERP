@@ -16,6 +16,12 @@ class Item < ActiveRecord::Base
   validates :name, :partNo, :presence => true
   validates :partNo, :uniqueness => true
 
+  has_settings do |s|
+    s.key :extra, :defaults => { :extra => ["D","C","V","U", "T", "M", "G", ""] }
+    s.key :group, :defaults => { :group => ["Digital BB", "RF", "PA", "Wireless", "resell"] }
+    s.key :package, :defaults => { :package => ["QFN*", "BGA*", "PCBA*", "LQFP*", "SW", "EVB"] }
+  end  
+
   before_destroy :ensure_not_referenced_by_any_line_item
   before_destroy :ensure_not_used_by_others
 
@@ -35,14 +41,42 @@ class Item < ActiveRecord::Base
   def self.import(file)
     spreadsheet = open_spreadsheet(file)
 
-    header = ["partNo", "group", "family", "name", "description", 
-    "package", "mop", "assembled", "base_item", "extra_item", "index"]
+    # header = ["partNo", "group", "family", "name", "description", 
+    # "package", "mop", "assembled", "base_item", "extra_item", "index"]
 
-    # header = spreadsheet.row(1)
+    header = ["partNo", "name", "package", "description", "mop", "group", "family", 
+             "assembled", "base_item", "extra_item", "index"]
+
+    import_errors = []
+    row_header = spreadsheet.row(1)
+    if !row_header.include?('partNo') || !row_header.include?('package')
+      logger.debug "=====@@@@Error: Invalid product list format== #{row_header[0]}"
+      import_errors.push('Error:Not a product list format, header[0] is ' + row_header[0])  
+
+      return import_errors
+    end    
+
     (2..spreadsheet.last_row).each do |i|
       row = Hash[[header, spreadsheet.row(i)].transpose]
 
-      # Upate exsits, find by uniq partNo, or new a item
+      # validations: 
+      # 1. extra only could be ["D","C","V","U", "T", "M", "G"]; 
+      # 2. if extra = "", then base==part_number
+      # 3. group only could be ["Digital BB", "RF", "PA", "Wireless", "resell"] & not blank
+      # 4. package only could be ["QFN*", "BGA*", "PCBA*", "LQFP*", "SW", "EVB"]
+
+      # item_extras = self.settings(:extra).extra
+      # item_groups = self.settings(:group).group
+      # item_packages = self.settings(:package).package
+
+      if row["partNo"].include?(' ')
+        logger.debug "=====@@@@Error: invalid part_number== #{row["partNo"]}"
+        
+        import_errors.push(row["partNo"])        
+        next
+      end
+
+      # Update exsits, find by uniq partNo, or new a item
       item = find_by(partNo: row["partNo"])  || new
 
       row_attributes = row.to_hash.slice(*header)
@@ -50,7 +84,12 @@ class Item < ActiveRecord::Base
       header.each do |attr|
         item.update_attribute(attr, row_attributes[attr])
       end      
+
+      # import_errors.push("debug:row(" + i.to_s)
+      # import_errors.push(")debug:partNo:" + item.partNo)
     end
+
+    return import_errors
   end
 
   def self.open_spreadsheet(file)

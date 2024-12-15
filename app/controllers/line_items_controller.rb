@@ -89,13 +89,22 @@ class LineItemsController < ApplicationController
     @line_item = LineItem.find(params[:id])
 
     respond_to do |format|
-      if params[:uniform_number] # produce with uniform_number
-        @line_item.update_attribute(:full_name, params[:full_name] )
-        @line_item.update_attribute(:remark, params[:remark])
-        format.html { redirect_to @line_item, notice: 'Line item was successfully updated.' }
-        format.js {}
-        format.json { head :no_content }     
-      elsif @line_item.update_attributes(params[:line_item])
+      # produce with uniform_number
+      # if params[:line_item][:uniform_number] 
+      #   logger.debug "==####==update line_item.uniform_number= #{params[:line_item][:uniform_number]}"
+      #   @line_item.update_attribute(:uniform_number, params[:uniform_number] )
+      #   @line_item.update_attribute(:remark, params[:remark])
+      #   if @line_item.save 
+      #     format.html { redirect_to(sales_orders_url) }
+      #     format.js {}
+      #     format.json { head :no_content }    
+      #   else
+      #     format.html { render action: "edit" }
+      #     format.js {}
+      #     format.json { render json: @line_item.errors, status: :unprocessable_entity }          
+      #   end 
+      # els
+      if @line_item.update_attributes(params[:line_item])
         format.html { redirect_to @line_item, notice: 'Line item was successfully updated.' }
         format.js {}
         format.json { head :no_content }

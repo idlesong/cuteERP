@@ -1,7 +1,7 @@
 class LineItem < ActiveRecord::Base
   attr_accessible :cart_id, :item_id, :quantity, :order_id, :price_id, :remark,
       :quantity_issued, :refer_line_id, :fixed_price, :full_part_number, :full_name,
-      :line_number
+      :line_number, :uniform_number
 
   validates :fixed_price, :presence => true, :numericality => {:greater_than_or_equal_to => 0}
   validates :quantity, :presence => true, :numericality => {:greater_than_or_equal_to => 1}
